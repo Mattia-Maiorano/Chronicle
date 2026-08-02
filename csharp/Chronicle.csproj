@@ -10,7 +10,7 @@
     <RootNamespace>Chronicle</RootNamespace>
     <AssemblyName>Chronicle</AssemblyName>
     <PackageId>Chronicle.Logging</PackageId>
-    <Version>0.2.0</Version>
+    <Version>1.0.0</Version>
     <Authors>Mattia-Maiorano</Authors>
     <Description>Flexible structured, colorized, and colorless console logging system for .NET and Unity applications.</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

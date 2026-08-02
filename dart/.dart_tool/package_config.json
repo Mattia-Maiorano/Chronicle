@@ -3,15 +3,15 @@
   "packages": [
     {
       "name": "_fe_analyzer_shared",
-      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-105.0.0",
+      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/_fe_analyzer_shared-92.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.11"
+      "languageVersion": "3.9"
     },
     {
       "name": "analyzer",
-      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/analyzer-14.1.0",
+      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/analyzer-9.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.11"
+      "languageVersion": "3.9"
     },
     {
       "name": "args",
@@ -111,9 +111,9 @@
     },
     {
       "name": "matcher",
-      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/matcher-0.12.20",
+      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/matcher-0.12.18",
       "packageUri": "lib/",
-      "languageVersion": "3.10"
+      "languageVersion": "3.7"
     },
     {
       "name": "meta",
@@ -135,9 +135,9 @@
     },
     {
       "name": "package_config",
-      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/package_config-3.0.0",
+      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/package_config-2.2.0",
       "packageUri": "lib/",
-      "languageVersion": "3.11"
+      "languageVersion": "3.4"
     },
     {
       "name": "path",
@@ -225,21 +225,21 @@
     },
     {
       "name": "test",
-      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/test-1.31.2",
+      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/test-1.28.0",
       "packageUri": "lib/",
-      "languageVersion": "3.11"
+      "languageVersion": "3.7"
     },
     {
       "name": "test_api",
-      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/test_api-0.7.13",
+      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/test_api-0.7.8",
       "packageUri": "lib/",
-      "languageVersion": "3.11"
+      "languageVersion": "3.7"
     },
     {
       "name": "test_core",
-      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/test_core-0.6.19",
+      "rootUri": "file:///Users/Mattia/.pub-cache/hosted/pub.dev/test_core-0.6.14",
       "packageUri": "lib/",
-      "languageVersion": "3.11"
+      "languageVersion": "3.7"
     },
     {
       "name": "typed_data",
@@ -297,8 +297,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.11.0",
-  "flutterRoot": "file:///Users/Mattia/fvm/versions/3.41.0",
-  "flutterVersion": "3.41.0",
+  "generatorVersion": "3.10.3",
+  "flutterRoot": "file:///Users/Mattia/fvm/versions/3.38.4",
+  "flutterVersion": "3.38.4",
   "pubCache": "file:///Users/Mattia/.pub-cache"
 }
