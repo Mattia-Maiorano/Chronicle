@@ -1,0 +1,31 @@
+{
+  "name": "@mattia-maiorano/chronicle",
+  "version": "0.2.0",
+  "description": "Flexible structured, colorized, and colorless console logging system.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mattia-Maiorano/Chronicle.git",
+    "directory": "typescript"
+  },
+  "scripts": {
+    "build": "npx -p typescript tsc",
+    "example": "npm run build && node dist/example.js"
+  },
+  "keywords": [
+    "logging",
+    "logger",
+    "console",
+    "ansi",
+    "cli",
+    "tree-logger",
+    "terminal"
+  ],
+  "author": "Mattia-Maiorano",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,241 +1,193 @@
-# Chronicle
+# Chronicle [![CI](https://github.com/Mattia-Maiorano/Chronicle/actions/workflows/ci.yml/badge.svg)](https://github.com/Mattia-Maiorano/Chronicle/actions/workflows/ci.yml)
 
-A flexible and colorized logging system for Python applications.
+A lightweight, zero-dependency multi-language logging system for Python, TypeScript, Go, Dart, Kotlin, and C# / Unity applications.
+
+---
 
 ## Overview
-Chronicle provides structured logging with support for indentation, spacing, colors, semantic message types, and a Colorless Mode for plain-text environments where terminal colors are unsupported.
 
-## Installation
+**Chronicle** provides structured terminal logging with support for indentation, spacing, ANSI colors, semantic message types, decision tree formatting, and a **Colorless Mode** for plain-text environments (e.g. CI logs, legacy terminals, file redirects).
 
-### From GitHub
-```bash
-pip install git+https://github.com/theUzumaki/Chronicle.git
+All language implementations adhere to a single unified specification documented in [SPEC.md](SPEC.md) to guarantee exact visual parity.
+
+---
+
+## Monorepo Architecture
+
+```
+Chronicle/
+├── SPEC.md         # Universal formatting & API specification sheet
+├── python/         # Python SDK & PyPI package
+├── typescript/     # TypeScript / Node.js SDK
+├── go/             # Go module
+├── dart/           # Dart / Flutter package
+├── kotlin/         # Kotlin / JVM package
+└── csharp/         # C# / Unity package
 ```
 
-### In requirements.txt
-```
-git+https://github.com/theUzumaki/Chronicle.git
-```
+---
 
-## Features
-- **Flexible formatting**: Control indentation, newlines before/after, and colors
-- **Semantic functions**: Pre-configured functions for errors, warnings, success, info, and debug messages
-- **Color support**: Full ANSI color support including bright text colors, background colors, and bold styles
-- **Structured Tree Logging**: Clean framing and tree logging (`StructuredLogger` / `log_banner`, `log_section`, `log_detail`, `log_decision`, `log_message`)
-- **Color Mode & Colorless Mode**: Global `set_color_mode(False)` toggle for plain-text environments without ANSI escape sequences
-- **Pipeline logging**: Special functions for structured logging in multi-step processes
-- **File operation logging**: Dedicated functions for logging file saves
+## Language Quickstarts
 
-## Basic Usage
-
-### Simple Logging
-```python
-from chronicle import log, Colors
-
-# Plain message
-log(0, 0, 0, None, "Hello, World!")
-
-# Colored message
-log(0, 0, 0, Colors.GREEN, "Success message in green")
-
-# Indented message
-log(1, 0, 0, Colors.CYAN, "This is indented 1 tab")
-log(2, 0, 0, Colors.YELLOW, "This is indented 2 tabs")
-
-# Message with spacing
-log(0, 2, 1, Colors.RED, "2 newlines before, 1 after")
-
-# Combined styles
-log(0, 0, 0, Colors.BOLD + Colors.BLUE, "Bold blue text")
-```
-
-## Semantic Logging Functions
-
-### Error Messages
-```python
-from chronicle import log_error
-
-log_error("File not found")
-log_error("Connection timeout", indentation_tabs=1)
-log_error("Critical failure", newline_before=1, newline_after=1)
-```
-
-### Warning Messages
-```python
-from chronicle import log_warning
-
-log_warning("Deprecated function used")
-log_warning("Low memory available", indentation_tabs=1)
-```
-
-### Success Messages
-```python
-from chronicle import log_success
-
-log_success("Operation completed successfully")
-log_success("Data processed", indentation_tabs=1)
-```
-
-### Info Messages
-```python
-from chronicle import log_info
-
-log_info("Starting process...")
-log_info("Loading configuration", indentation_tabs=1)
-```
-
-### Debug Messages
-```python
-from chronicle import log_debug
-
-log_debug("Variable x = 42")
-log_debug("Function called with args: foo, bar", indentation_tabs=1)
-```
-
-## Color Mode vs. Colorless Mode
-
-Chronicle allows toggling color mode globally. When Color Mode is disabled (`set_color_mode(False)`), ANSI escape codes are omitted for plain-text logging.
+### 🐍 Python (`python/`)
 
 ```python
-from chronicle import set_color_mode, log_info, log_error, log_success
+from chronicle import StructuredLogger, set_color_mode, log_info, log_decision
 
-# Disable colors for plain-text logging
-set_color_mode(False)
+# Toggles global color / colorless modes
+set_color_mode(True)
 
-log_info("Running in plain text environment")  # Outputs: [INFO] Running in plain text environment
-log_error("Failed to connect")                  # Outputs: [ERROR] Failed to connect
-log_success("Process finished")                 # Outputs: [OK] Process finished
-```
+log_info("Starting data pipeline...")
 
-### Structured Tree Logger (`StructuredLogger`)
-Chronicle provides a structured debug logger using framing, tree indentation, and decision arrows. In Color Mode, tree lines and banners are syntax-highlighted; in Colorless Mode, plain text is produced:
-
-```python
-from chronicle import StructuredLogger
-
-# Log a top-level section header wrapped in a border box
-StructuredLogger.log_banner("DATA PROCESSING ENGINE")
-
-# Log an indented sub-section or category header
+# Structured Tree Logging
+StructuredLogger.log_banner("DATA PROCESSING ENGINE", width=54)
 StructuredLogger.log_section("Execution Phase")
-
-# Log key-value metric items in the tree
-StructuredLogger.log_detail("Batch size", "64")
-StructuredLogger.log_detail("Latency", "14.2ms")
-
-# Log a decision or state transition arrow
+StructuredLogger.log_detail("Batch size", 64)
 StructuredLogger.log_decision("PASS", "Quality score 0.96 >= 0.85 threshold")
-
-# Log a raw message with optional tree indent
-StructuredLogger.log_message("Pipeline ready for next batch", indent_level=1)
 ```
 
-**Output:**
+---
+
+### 🟦 TypeScript / Node.js (`typescript/`)
+
+```typescript
+import { StructuredLogger, setColorMode, logInfo } from "@mattia-maiorano/chronicle";
+
+setColorMode(true);
+
+logInfo("Starting data pipeline...");
+
+StructuredLogger.logBanner("DATA PROCESSING ENGINE", 54);
+StructuredLogger.logSection("Execution Phase");
+StructuredLogger.logDetail("Batch size", "64");
+StructuredLogger.logDecision("PASS", "Quality score 0.96 >= 0.85 threshold");
+```
+
+---
+
+### 🐹 Go (`go/`)
+
+```go
+package main
+
+import "github.com/Mattia-Maiorano/Chronicle/go"
+
+func main() {
+    chronicle.SetColorMode(true)
+
+    chronicle.LogInfo("Starting data pipeline...")
+
+    chronicle.LogBanner("DATA PROCESSING ENGINE", 54)
+    chronicle.LogSection("Execution Phase")
+    chronicle.LogDetail("Batch size", 64)
+    chronicle.LogDecision("PASS", "Quality score 0.96 >= 0.85 threshold")
+}
+```
+
+---
+
+### 🎯 Dart / Flutter (`dart/`)
+
+```dart
+import 'package:chronicle/chronicle.dart';
+
+void main() {
+  setColorMode(true);
+
+  logInfo("Starting data pipeline...");
+
+  StructuredLogger.logBanner("DATA PROCESSING ENGINE", width: 54);
+  StructuredLogger.logSection("Execution Phase");
+  StructuredLogger.logDetail("Batch size", 64);
+  StructuredLogger.logDecision("PASS", detail: "Quality score 0.96 >= 0.85 threshold");
+}
+```
+
+---
+
+### 🟪 Kotlin (`kotlin/`)
+
+```kotlin
+import chronicle.*
+
+fun main() {
+    setColorMode(true)
+
+    logInfo("Starting data pipeline...")
+
+    StructuredLogger.logBanner("DATA PROCESSING ENGINE", width = 54)
+    StructuredLogger.logSection("Execution Phase")
+    StructuredLogger.logDetail("Batch size", 64)
+    StructuredLogger.logDecision("PASS", detail = "Quality score 0.96 >= 0.85 threshold")
+}
+```
+
+---
+
+### 🟢 C# / Unity (`csharp/`)
+
+```csharp
+using Chronicle;
+
+// Supports standard console out or UnityEngine.Debug.Log under UNITY_ENGINE
+ChronicleLogger.SetColorMode(true);
+
+ChronicleLogger.LogInfo("Starting data pipeline...");
+
+StructuredLogger.LogBanner("DATA PROCESSING ENGINE", 54);
+StructuredLogger.LogSection("Execution Phase");
+StructuredLogger.LogDetail("Batch size", 64);
+StructuredLogger.LogDecision("PASS", "Quality score 0.96 >= 0.85 threshold");
+```
+
+---
+
+## Visual Output Demo
+
+Chronicle produces identical terminal output across all 6 languages:
+
+### Color Mode
 ```
 +----------------------------------------------------+
 | [DATA PROCESSING ENGINE]                           |
 +----------------------------------------------------+
+
+
   |-- Execution Phase:
   +-- Batch size             : 64
-  +-- Latency                : 14.2ms
+  +-- Execution latency      : 14.2ms
+
   +--> DECISION: PASS -> Quality score 0.96 >= 0.85 threshold
+
   |-- Pipeline ready for next batch
 ```
 
-You can also use standalone top-level functions (`log_banner`, `log_section`, `log_detail`, `log_decision`, `log_message`) or camelCase aliases (`logBanner`, `logSection`, `logDetail`, `logDecision`, `logMessage`).
+### Colorless Mode (`set_color_mode(False)`)
+```
+[INFO] Starting pipeline execution in Colorless Mode...
+[Step 1/3] Initialization
+		[DEBUG] Running internal task for Initialization
+[OK] Initialization complete
 
-## Structured Logging
++----------------------------------------------------+
+| [DATA PROCESSING ENGINE]                           |
++----------------------------------------------------+
 
-### Section Headers
-```python
-from chronicle import log_section_header, log_subsection
+  |-- Execution Phase:
+  +-- Batch size             : 64
+  +-- Execution latency      : 14.2ms
 
-log_section_header("MAIN PROCESSING PIPELINE")
-log_subsection("Data Loading Phase")
+  +--> DECISION: PASS -> Quality score 0.96 >= 0.85 threshold
 ```
 
-### Step-by-step Logging
-```python
-from chronicle import log_step
+---
 
-log_step(1, 5, "Preprocessing data")
-log_step(2, 5, "Feature extraction")
-log_step(3, 5, "Model training")
-```
+## Specification
 
-### File Operations
-```python
-from chronicle import log_file_saved
+For complete ANSI palette escape codes, border box glyphs, line padding conventions, and API method signatures, see the [SPEC.md](SPEC.md) document.
 
-log_file_saved("output/results.png")
-log_file_saved("models/trained_model.bin", indentation_tabs=1)
-```
+---
 
-## Color Reference
+## License
 
-### Text Colors
-- `Colors.BLACK`, `Colors.RED`, `Colors.GREEN`, `Colors.YELLOW`
-- `Colors.BLUE`, `Colors.MAGENTA`, `Colors.CYAN`, `Colors.WHITE`
-
-### Bright Text Colors
-- `Colors.BRIGHT_RED`, `Colors.BRIGHT_GREEN`, `Colors.BRIGHT_YELLOW`
-- `Colors.BRIGHT_BLUE`, `Colors.BRIGHT_MAGENTA`, `Colors.BRIGHT_CYAN`
-
-### Background Colors
-- `Colors.BG_BLACK`, `Colors.BG_RED`, `Colors.BG_GREEN`, `Colors.BG_YELLOW`
-- `Colors.BG_BLUE`, `Colors.BG_MAGENTA`, `Colors.BG_CYAN`, `Colors.BG_WHITE`
-
-### Text Styles
-- `Colors.BOLD` - Bold text
-- `Colors.DIM` - Dimmed text
-- `Colors.ITALIC` - Italic text
-- `Colors.UNDERLINE` - Underlined text
-- `Colors.REVERSE` - Inverted colors
-
-### Semantic Colors
-- `Colors.ERROR` - Red (for errors)
-- `Colors.WARNING` - Yellow (for warnings)
-- `Colors.SUCCESS` - Green (for success)
-- `Colors.INFO` - Cyan (for information)
-- `Colors.DEBUG` - Bright Magenta (for debug)
-- `Colors.HEADER` - Bright cyan (for headers)
-
-## Function Reference
-
-### `log(indentation_tabs, newline_before, newline_after, color, content)`
-The core logging function.
-
-### Color Mode Control & Tree Logger
-- `set_color_mode(enabled: bool = True)` - Enable or disable global Color Mode
-- `get_color_mode() -> bool` - Return current Color Mode state
-- `log_banner(title: str, width: int = 54)` / `StructuredLogger.log_banner` - Log border box banner
-- `log_section(category: str, indent_level: int = 0)` / `StructuredLogger.log_section` - Log indented category header
-- `log_detail(label: str, value: Any, indent_level: int = 0)` / `StructuredLogger.log_detail` - Log key-value metric item
-- `log_decision(action: str, detail: Optional[str] = None, indent_level: int = 0)` / `StructuredLogger.log_decision` - Log decision arrow
-- `log_message(message: str, indent_level: int = 0)` / `StructuredLogger.log_message` - Log raw tree message
-
-### Semantic Functions
-All semantic functions accept:
-- `message` (str): The message to log
-- `indentation_tabs` (int): Indentation level (default: 0)
-- `newline_before` (int): Newlines before (default: 0)
-- `newline_after` (int): Newlines after (default: 0)
-
-Functions:
-- `log_error(message, ...)` - Log error
-- `log_warning(message, ...)` - Log warning
-- `log_success(message, ...)` - Log success
-- `log_info(message, ...)` - Log info
-- `log_debug(message, ...)` - Log debug
-
-### Structural Functions
-- `log_section_header(title, indentation_tabs=0)` - Log major section header
-- `log_subsection(title, indentation_tabs=0)` - Log subsection header
-- `log_step(step_number, total_steps, description, indentation_tabs=0)` - Log processing step
-- `log_file_saved(filepath, indentation_tabs=1)` - Log file save operation
-
-## Demo
-Run the demo script to see a concise example of both Color Mode and Colorless Mode in action:
-```bash
-python example.py
-```
+Apache License 2.0. See [LICENSE](LICENSE) for details.

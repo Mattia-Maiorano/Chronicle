@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks Condition="'$(GITHUB_ACTIONS)' == 'true'">net8.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(GITHUB_ACTIONS)' != 'true'">net7.0;netstandard2.1</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>10.0</LangVersion>
+    <RootNamespace>Chronicle</RootNamespace>
+    <AssemblyName>Chronicle</AssemblyName>
+    <PackageId>Chronicle.Logging</PackageId>
+    <Version>0.2.0</Version>
+    <Authors>Mattia-Maiorano</Authors>
+    <Description>Flexible structured, colorized, and colorless console logging system for .NET and Unity applications.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Mattia-Maiorano/Chronicle</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Mattia-Maiorano/Chronicle</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>

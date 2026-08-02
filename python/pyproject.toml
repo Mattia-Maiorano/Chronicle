@@ -3,12 +3,12 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "chronicle"
+name = "chronicle-log"
 version = "0.1.2"
 description = "A flexible and colorized logging system for Python applications"
 readme = "README.md"
 authors = [
-    { name = "theUzumaki", email = "mattiamaiorano02@gmail.com" }
+    { name = "Mattia-Maiorano", email = "mattiamaiorano02@gmail.com" }
 ]
 requires-python = ">=3.7"
 classifiers = [
@@ -28,9 +28,9 @@ classifiers = [
 keywords = ["logging", "logger", "colorized", "terminal", "console"]
 
 [project.urls]
-Homepage = "https://github.com/theUzumaki/Chronicle"
-Repository = "https://github.com/theUzumaki/Chronicle"
-Issues = "https://github.com/theUzumaki/Chronicle/issues"
+Homepage = "https://github.com/Mattia-Maiorano/Chronicle"
+Repository = "https://github.com/Mattia-Maiorano/Chronicle"
+Issues = "https://github.com/Mattia-Maiorano/Chronicle/issues"
 
 [tool.setuptools]
 packages = ["chronicle"]

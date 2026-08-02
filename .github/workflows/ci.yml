@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 1. Setup Languages/SDKs
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up Go 1.22
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Set up Dart SDK
+        uses: dart-lang/setup-dart@v1
+
+      - name: Set up JDK 17 (Kotlin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Set up .NET 8.0 (C#)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      # 2. Run Tests & Examples
+      - name: Python Tests & Example
+        run: |
+          PYTHONPATH=python python3 -m unittest discover -s python/tests
+          PYTHONPATH=python python3 python/example.py
+
+      - name: TypeScript Build & Example
+        run: |
+          cd typescript
+          npm install
+          npm run build
+          npm run example
+
+      - name: Go Example
+        run: |
+          cd go
+          go run example/main.go
+
+      - name: Dart Example
+        run: |
+          cd dart
+          dart pub get
+          dart run example/example.dart
+
+      - name: Kotlin Example
+        run: |
+          cd kotlin
+          gradle run
+
+      - name: C# Example
+        run: |
+          dotnet run --project csharp/Chronicle.csproj --framework net8.0
