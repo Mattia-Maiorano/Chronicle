@@ -15,7 +15,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("ChronicleExampleKt")
+    mainClass.set("ExampleKt")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
