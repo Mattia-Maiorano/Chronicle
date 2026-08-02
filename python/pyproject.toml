@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "chronicle-log"
+name = "chronicle-py"
 version = "0.1.2"
 description = "A flexible and colorized logging system for Python applications"
 readme = "README.md"
