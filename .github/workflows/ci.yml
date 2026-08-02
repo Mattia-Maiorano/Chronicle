@@ -62,9 +62,9 @@ jobs:
           cd go
           go run example/main.go
 
-      - name: Run Dart Example
-        working-directory: ./dart
+      - name: Dart Example
         run: |
+          cd dart
           dart pub get
           dart run example/example.dart
 
