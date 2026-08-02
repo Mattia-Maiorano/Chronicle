@@ -1,13 +1,12 @@
 """example.py
 Runnable demonstration of Chronicle's public API.
 
-This script is intentionally small and dependency-free. It shows a short
-pipeline using the functions exported by the package. Run it with:
+This script demonstrates identical logging hierarchies in both modes:
+1. Color Mode (Full ANSI colors, bright styles, and tree formatting)
+2. Colorless Mode (Clean plain text without ANSI escape sequences)
 
+Run it with:
     python example.py
-
-The demo is safe to run in CI or a local terminal; it simply prints to stdout
-using the library's color and formatting helpers.
 """
 
 from time import sleep
@@ -26,25 +25,24 @@ from chronicle import (
     log_info,
     log_debug,
     log_final_result,
-    log_newline,
+    set_color_mode,
+    StructuredLogger,
 )
 
 
-def main() -> None:
-    # Application title
-    log_application_title("CHRONICLE DEMO", width=50)
+def run_demo_pipeline(mode_name: str) -> None:
+    """Run the complete logging hierarchy for a given modality."""
+    # Application Title
+    log_application_title(f"CHRONICLE DEMO ({mode_name.upper()})", width=54)
 
-    # High-level section
-    log_section_header("SHORT DEMO")
+    # 1. High-level Pipeline Section & Steps
+    log_section_header("PROCESSING PIPELINE")
+    log_info(f"Starting pipeline execution in {mode_name}...")
 
-    # Info and steps
-    log_info("Starting demo...")
-
-    for i, step_name in enumerate(("Initialize", "Process", "Finalize"), start=1):
+    for i, step_name in enumerate(("Initialization", "Data Processing", "Evaluation"), start=1):
         log_step(i, 3, step_name)
-        # simulate some work
-        log_debug(f"Running internal work for {step_name}")
-        sleep(0.12)
+        log_debug(f"Running internal task for {step_name}")
+        sleep(0.05)
 
         if i == 1:
             log_success("Initialization complete")
@@ -53,13 +51,34 @@ def main() -> None:
         else:
             log_success("All steps finished")
 
-    # File operation example
-    log_subsection("File operations")
-    log_file_saved("output/results.json")
-    log(1, 0, 1, Colors.BOLD + Colors.CYAN, "Custom-styled message: demo complete")
+    # 2. File Operations
+    log_subsection("File Operations")
+    log_file_saved("output/data_model.bin")
+    log_file_saved("output/metrics.json")
 
-    # Final boxed result
-    log_final_result(True, "Demo completed successfully")
+    # 3. Structured Tree Logger
+    StructuredLogger.log_banner("DATA PROCESSING ENGINE", width=54)
+    StructuredLogger.log_section("Execution Phase")
+    StructuredLogger.log_detail("Batch size", "64", indent_level=0)
+    StructuredLogger.log_detail("Execution latency", "14.2ms", indent_level=0)
+    StructuredLogger.log_decision("PASS", "Quality score 0.96 >= 0.85 threshold")
+    StructuredLogger.log_message("Pipeline ready for next batch", indent_level=1)
+
+    # 4. Final Result Box
+    log_final_result(True, f"Demo completed successfully ({mode_name})")
+
+
+def main() -> None:
+    # --- 1. Run Pipeline in Color Mode ---
+    set_color_mode(True)
+    run_demo_pipeline("Color Mode")
+
+    # --- 2. Run Identical Pipeline in Colorless Mode ---
+    set_color_mode(False)
+    run_demo_pipeline("Colorless Mode")
+
+    # Reset back to default (Color Mode)
+    set_color_mode(True)
 
 
 if __name__ == "__main__":

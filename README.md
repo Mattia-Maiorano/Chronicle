@@ -3,7 +3,7 @@
 A flexible and colorized logging system for Python applications.
 
 ## Overview
-Chronicle provides structured logging with support for indentation, spacing, colors, and semantic message types.
+Chronicle provides structured logging with support for indentation, spacing, colors, semantic message types, and a Colorless Mode for plain-text environments where terminal colors are unsupported.
 
 ## Installation
 
@@ -20,10 +20,11 @@ git+https://github.com/theUzumaki/Chronicle.git
 ## Features
 - **Flexible formatting**: Control indentation, newlines before/after, and colors
 - **Semantic functions**: Pre-configured functions for errors, warnings, success, info, and debug messages
-- **Color support**: Full ANSI color support including text colors, bright colors, background colors, and styles
+- **Color support**: Full ANSI color support including bright text colors, background colors, and bold styles
+- **Structured Tree Logging**: Clean framing and tree logging (`StructuredLogger` / `log_banner`, `log_section`, `log_detail`, `log_decision`, `log_message`)
+- **Color Mode & Colorless Mode**: Global `set_color_mode(False)` toggle for plain-text environments without ANSI escape sequences
 - **Pipeline logging**: Special functions for structured logging in multi-step processes
-- **File operation logging**: Dedicated functions for logging file saves and detection results
- - **File operation logging**: Dedicated functions for logging file saves
+- **File operation logging**: Dedicated functions for logging file saves
 
 ## Basic Usage
 
@@ -91,6 +92,58 @@ log_debug("Variable x = 42")
 log_debug("Function called with args: foo, bar", indentation_tabs=1)
 ```
 
+## Color Mode vs. Colorless Mode
+
+Chronicle allows toggling color mode globally. When Color Mode is disabled (`set_color_mode(False)`), ANSI escape codes are omitted for plain-text logging.
+
+```python
+from chronicle import set_color_mode, log_info, log_error, log_success
+
+# Disable colors for plain-text logging
+set_color_mode(False)
+
+log_info("Running in plain text environment")  # Outputs: [INFO] Running in plain text environment
+log_error("Failed to connect")                  # Outputs: [ERROR] Failed to connect
+log_success("Process finished")                 # Outputs: [OK] Process finished
+```
+
+### Structured Tree Logger (`StructuredLogger`)
+Chronicle provides a structured debug logger using framing, tree indentation, and decision arrows. In Color Mode, tree lines and banners are syntax-highlighted; in Colorless Mode, plain text is produced:
+
+```python
+from chronicle import StructuredLogger
+
+# Log a top-level section header wrapped in a border box
+StructuredLogger.log_banner("DATA PROCESSING ENGINE")
+
+# Log an indented sub-section or category header
+StructuredLogger.log_section("Execution Phase")
+
+# Log key-value metric items in the tree
+StructuredLogger.log_detail("Batch size", "64")
+StructuredLogger.log_detail("Latency", "14.2ms")
+
+# Log a decision or state transition arrow
+StructuredLogger.log_decision("PASS", "Quality score 0.96 >= 0.85 threshold")
+
+# Log a raw message with optional tree indent
+StructuredLogger.log_message("Pipeline ready for next batch", indent_level=1)
+```
+
+**Output:**
+```
++----------------------------------------------------+
+| [DATA PROCESSING ENGINE]                           |
++----------------------------------------------------+
+  |-- Execution Phase:
+  +-- Batch size             : 64
+  +-- Latency                : 14.2ms
+  +--> DECISION: PASS -> Quality score 0.96 >= 0.85 threshold
+  |-- Pipeline ready for next batch
+```
+
+You can also use standalone top-level functions (`log_banner`, `log_section`, `log_detail`, `log_decision`, `log_message`) or camelCase aliases (`logBanner`, `logSection`, `logDetail`, `logDecision`, `logMessage`).
+
 ## Structured Logging
 
 ### Section Headers
@@ -115,20 +168,7 @@ log_step(3, 5, "Model training")
 from chronicle import log_file_saved
 
 log_file_saved("output/results.png")
-log_file_saved("models/trained_model.pkl", indentation_tabs=1)
-```
-
-### Detection Results
-
-NOTE: The prior `log_detection_result` helper was removed from the public API.
-Use `log_info`, `log_file_saved`, or other semantic functions to report detection
-results, for example:
-
-```python
-from chronicle import log_info
-
-log_info("Accuracy: 95.3%")
-log_info("Clock center: (320, 240)")
+log_file_saved("models/trained_model.bin", indentation_tabs=1)
 ```
 
 ## Color Reference
@@ -157,53 +197,22 @@ log_info("Clock center: (320, 240)")
 - `Colors.WARNING` - Yellow (for warnings)
 - `Colors.SUCCESS` - Green (for success)
 - `Colors.INFO` - Cyan (for information)
-- `Colors.DEBUG` - Magenta (for debug)
+- `Colors.DEBUG` - Bright Magenta (for debug)
 - `Colors.HEADER` - Bright cyan (for headers)
-
-## Complete Pipeline Example
-
-```python
-from chronicle import (
-    log, log_section_header, log_step, log_error, log_success,
-    log_file_saved, Colors
-)
-
-# Application header
-log(0, 1, 0, Colors.BRIGHT_MAGENTA + Colors.BOLD, "╔═════════════════════╗")
-log(0, 0, 0, Colors.BRIGHT_MAGENTA + Colors.BOLD, "║  MY APPLICATION     ║")
-log(0, 0, 1, Colors.BRIGHT_MAGENTA + Colors.BOLD, "╚═════════════════════╝")
-
-# Main pipeline
-log_section_header("PROCESSING PIPELINE")
-
-log_step(1, 3, "Data Loading")
-log_file_saved("data/input.csv", indentation_tabs=1)
-
-log_step(2, 3, "Processing")
-log(1, 0, 0, Colors.INFO, "Items processed: 1000")
-
-log_step(3, 3, "Saving Results")
-log_file_saved("output/results.json", indentation_tabs=1)
-
-# Final result
-log(0, 1, 0, Colors.SUCCESS + Colors.BOLD, "=" * 60)
-log_success("Pipeline completed successfully!", newline_after=1)
-log(0, 0, 1, Colors.SUCCESS + Colors.BOLD, "=" * 60)
-```
 
 ## Function Reference
 
 ### `log(indentation_tabs, newline_before, newline_after, color, content)`
 The core logging function.
 
-**Parameters:**
-- `indentation_tabs` (int): Number of tabs to indent (default: 0)
-- `newline_before` (int): Number of newlines before content (default: 0)
-- `newline_after` (int): Number of newlines after content (default: 0)
-- `color` (str): ANSI color code from Colors class (default: None)
-- `content` (str): Message content to log
-
-**Returns:** None
+### Color Mode Control & Tree Logger
+- `set_color_mode(enabled: bool = True)` - Enable or disable global Color Mode
+- `get_color_mode() -> bool` - Return current Color Mode state
+- `log_banner(title: str, width: int = 54)` / `StructuredLogger.log_banner` - Log border box banner
+- `log_section(category: str, indent_level: int = 0)` / `StructuredLogger.log_section` - Log indented category header
+- `log_detail(label: str, value: Any, indent_level: int = 0)` / `StructuredLogger.log_detail` - Log key-value metric item
+- `log_decision(action: str, detail: Optional[str] = None, indent_level: int = 0)` / `StructuredLogger.log_decision` - Log decision arrow
+- `log_message(message: str, indent_level: int = 0)` / `StructuredLogger.log_message` - Log raw tree message
 
 ### Semantic Functions
 All semantic functions accept:
@@ -213,34 +222,20 @@ All semantic functions accept:
 - `newline_after` (int): Newlines after (default: 0)
 
 Functions:
-- `log_error(message, ...)` - Log error with ✗ symbol
-- `log_warning(message, ...)` - Log warning with ⚠ symbol
-- `log_success(message, ...)` - Log success with ✓ symbol
-- `log_info(message, ...)` - Log info with ℹ symbol
-- `log_debug(message, ...)` - Log debug with 🔍 symbol
+- `log_error(message, ...)` - Log error
+- `log_warning(message, ...)` - Log warning
+- `log_success(message, ...)` - Log success
+- `log_info(message, ...)` - Log info
+- `log_debug(message, ...)` - Log debug
 
 ### Structural Functions
 - `log_section_header(title, indentation_tabs=0)` - Log major section header
 - `log_subsection(title, indentation_tabs=0)` - Log subsection header
 - `log_step(step_number, total_steps, description, indentation_tabs=0)` - Log processing step
-- `log_file_saved(filepath, indentation_tabs=1)` - Log file save with 💾 symbol
--- `log_detection_result(label, value, indentation_tabs=1)` - NOTE: removed from public API; use `log_info` or `log_file_saved`
+- `log_file_saved(filepath, indentation_tabs=1)` - Log file save operation
 
 ## Demo
-Run the demo script to see a concise example of the API in action:
+Run the demo script to see a concise example of both Color Mode and Colorless Mode in action:
 ```bash
 python example.py
 ```
-
-## Integration Example
-The logger has been integrated into `main.py` to replace all print statements with structured, colorized logging. This provides:
-- Clear visual separation between pipeline stages
-- Consistent error and success message formatting
-- Easy identification of file operations and detection results
-- Professional, readable output
-
-## Notes
-- Colors use ANSI escape codes and work in most modern terminals
-- Some terminals may not support all styles (italic, dim, etc.)
-- Colors are automatically reset after each message to prevent bleeding
-- Combine multiple color codes with `+` for compound styles

@@ -1,7 +1,49 @@
 """
-Logger module for structured and colorized console output.
-Provides a flexible logging function with indentation, spacing, and color support.
+Logger module for structured, colorized, and colorless console output.
+Provides a flexible logging function with indentation, spacing, color, and tree structure support.
 """
+
+from typing import Any, Optional
+
+_COLOR_MODE: bool = True
+
+
+def set_color_mode(enabled: bool = True) -> None:
+    """
+    Enable or disable global color mode for logging.
+    When set to False (colorless mode), color codes and non-ASCII decorative borders are omitted.
+    """
+    global _COLOR_MODE
+    _COLOR_MODE = enabled
+
+
+def get_color_mode() -> bool:
+    """
+    Get the current global color mode state.
+    """
+    return _COLOR_MODE
+
+
+def set_colorless_mode(enabled: bool = True) -> None:
+    """
+    Enable or disable colorless mode.
+    """
+    global _COLOR_MODE
+    _COLOR_MODE = not enabled
+
+
+def set_ascii_mode(enabled: bool = True) -> None:
+    """
+    Backward-compatible alias for set_colorless_mode.
+    """
+    set_colorless_mode(enabled)
+
+
+def get_ascii_mode() -> bool:
+    """
+    Backward-compatible alias for checking if colorless mode is active.
+    """
+    return not _COLOR_MODE
 
 
 class Colors:
@@ -52,27 +94,17 @@ class Colors:
     WARNING = YELLOW
     SUCCESS = GREEN
     INFO = CYAN
-    DEBUG = MAGENTA
+    DEBUG = BRIGHT_MAGENTA
     HEADER = BRIGHT_CYAN
     EMPHASIS = BRIGHT_YELLOW
 
-def log(indentation_tabs=0, newline_before=0, newline_after=0, color=None, content=""):
+
+def log(indentation_tabs=0, newline_before=0, newline_after=0, color=None, content="", color_mode=None):
     """
     Log a message with structured formatting, indentation, spacing, and color.
-    
-    Args:
-        indentation_tabs (int): Number of tabs to indent the content (default: 0)
-        newline_before (int): Number of newlines to print before the content (default: 0)
-        newline_after (int): Number of newlines to print after the content (default: 0)
-        color (str): ANSI color code from Colors class (default: None for no color)
-        content (str): The message content to log
-    
-    Usage Examples:
-        log(0, 0, 0, Colors.INFO, "Starting process...")
-        log(1, 0, 1, Colors.SUCCESS, "✓ Task completed")
-        log(2, 1, 0, Colors.ERROR, "✗ Error occurred")
-        log(0, 0, 0, Colors.HEADER + Colors.BOLD, "=== SECTION HEADER ===")
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+
     # Print newlines before content
     if newline_before > 0:
         print('\n' * (newline_before - 1), end='')
@@ -80,8 +112,8 @@ def log(indentation_tabs=0, newline_before=0, newline_after=0, color=None, conte
     # Build indentation
     indentation = '\t' * indentation_tabs
     
-    # Build the message with color if specified
-    if color:
+    # Build the message with color if specified and in color mode
+    if color and use_color:
         message = f"{indentation}{color}{content}{Colors.RESET}"
     else:
         message = f"{indentation}{content}"
@@ -95,194 +127,313 @@ def log(indentation_tabs=0, newline_before=0, newline_after=0, color=None, conte
     else:
         print()  # Default newline
 
+
 def log_newline(count=1):
     """
     Log specified number of newlines.
-    
-    Args:
-        count (int): Number of newlines to print (default: 1)
     """
     print('\n' * (count - 1), end='')
     print()  # Ensure at least one newline
 
-def log_application_title(title, width=60):
+
+def log_application_title(title, width=60, color_mode=None):
     """
     Log a stylized application title with decorative borders.
-    
-    Args:
-        title (str): Application title text
-        width (int): Width of the title box (default: 60)
-    
-    Usage:
-        log_application_title("CLOCK TIME DETECTION APPLICATION")
     """
-    # Calculate padding to center the title
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+
     title_length = len(title)
-    if title_length + 2 > width - 2:  # Ensure title fits with at least 1 space on each side
+    if title_length + 2 > width - 2:
         width = title_length + 4
     
     padding = (width - 2 - title_length) // 2
     padded_title = " " * padding + title + " " * (width - 2 - title_length - padding)
     
-    top_border = "╔" + "═" * (width - 2) + "╗"
-    middle_line = "║" + padded_title + "║"
-    bottom_border = "╚" + "═" * (width - 2) + "╝"
+    if use_color:
+        top_border = "╔" + "═" * (width - 2) + "╗"
+        middle_line = "║" + padded_title + "║"
+        bottom_border = "╚" + "═" * (width - 2) + "╝"
+        color = Colors.BRIGHT_MAGENTA + Colors.BOLD
+    else:
+        top_border = "+" + "-" * (width - 2) + "+"
+        middle_line = "|" + padded_title + "|"
+        bottom_border = "+" + "-" * (width - 2) + "+"
+        color = None
     
     log_newline(2)
-    log(0, 1, 0, Colors.BRIGHT_MAGENTA + Colors.BOLD, top_border)
-    log(0, 0, 0, Colors.BRIGHT_MAGENTA + Colors.BOLD, middle_line)
-    log(0, 0, 1, Colors.BRIGHT_MAGENTA + Colors.BOLD, bottom_border)
+    log(0, 1, 0, color, top_border, color_mode=use_color)
+    log(0, 0, 0, color, middle_line, color_mode=use_color)
+    log(0, 0, 1, color, bottom_border, color_mode=use_color)
     log_newline(2)
 
-def log_section_header(title, indentation_tabs=0):
+
+def log_section_header(title, indentation_tabs=0, color_mode=None):
     """
     Log a section header with consistent formatting.
-    
-    Args:
-        title (str): Section title
-        indentation_tabs (int): Indentation level
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    color = Colors.HEADER + Colors.BOLD if use_color else None
     separator = "=" * 60
-    log(indentation_tabs, 1, 0, Colors.HEADER + Colors.BOLD, separator)
-    log(indentation_tabs, 0, 0, Colors.HEADER + Colors.BOLD, title)
-    log(indentation_tabs, 0, 1, Colors.HEADER + Colors.BOLD, separator)
+
+    log(indentation_tabs, 1, 0, color, separator, color_mode=use_color)
+    log(indentation_tabs, 0, 0, color, title, color_mode=use_color)
+    log(indentation_tabs, 0, 1, color, separator, color_mode=use_color)
     log_newline()
 
 
-def log_subsection(title, indentation_tabs=0):
+def log_subsection(title, indentation_tabs=0, color_mode=None):
     """
     Log a subsection header with consistent formatting.
-    
-    Args:
-        title (str): Subsection title
-        indentation_tabs (int): Indentation level
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    color = Colors.BRIGHT_CYAN if use_color else None
     separator = "-" * 40
-    log(indentation_tabs, 1, 0, Colors.BRIGHT_CYAN, separator)
-    log(indentation_tabs, 0, 0, Colors.BRIGHT_CYAN, title)
-    log(indentation_tabs, 0, 0, Colors.BRIGHT_CYAN, separator)
+
+    log(indentation_tabs, 1, 0, color, separator, color_mode=use_color)
+    log(indentation_tabs, 0, 0, color, title, color_mode=use_color)
+    log(indentation_tabs, 0, 0, color, separator, color_mode=use_color)
     log_newline()
 
 
-def log_error(message, indentation_tabs=0, newline_before=0, newline_after=0):
+def log_error(message, indentation_tabs=0, newline_before=0, newline_after=0, color_mode=None):
     """
     Log an error message with consistent formatting.
-    
-    Args:
-        message (str): Error message
-        indentation_tabs (int): Indentation level
-        newline_before (int): Newlines before
-        newline_after (int): Newlines after
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    prefix = "ERROR:" if use_color else "[ERROR]"
+    color = Colors.ERROR + Colors.BOLD if use_color else None
     log(indentation_tabs, newline_before, newline_after, 
-        Colors.ERROR + Colors.BOLD, f"✗ ERROR: {message}")
+        color, f"{prefix} {message}", color_mode=use_color)
 
 
-def log_warning(message, indentation_tabs=0, newline_before=0, newline_after=0):
+def log_warning(message, indentation_tabs=0, newline_before=0, newline_after=0, color_mode=None):
     """
     Log a warning message with consistent formatting.
-    
-    Args:
-        message (str): Warning message
-        indentation_tabs (int): Indentation level
-        newline_before (int): Newlines before
-        newline_after (int): Newlines after
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    prefix = "WARNING:" if use_color else "[WARNING]"
+    color = Colors.WARNING + Colors.BOLD if use_color else None
     log(indentation_tabs, newline_before, newline_after, 
-        Colors.WARNING + Colors.BOLD, f"⚠ WARNING: {message}")
+        color, f"{prefix} {message}", color_mode=use_color)
 
 
-def log_success(message, indentation_tabs=0, newline_before=0, newline_after=0):
+def log_success(message, indentation_tabs=0, newline_before=0, newline_after=0, color_mode=None):
     """
     Log a success message with consistent formatting.
-    
-    Args:
-        message (str): Success message
-        indentation_tabs (int): Indentation level
-        newline_before (int): Newlines before
-        newline_after (int): Newlines after
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    prefix = "SUCCESS:" if use_color else "[OK]"
+    color = Colors.SUCCESS + Colors.BOLD if use_color else None
     log(indentation_tabs, newline_before, newline_after, 
-        Colors.SUCCESS + Colors.BOLD, f"✓ {message}")
+        color, f"{prefix} {message}", color_mode=use_color)
 
 
-def log_info(message, indentation_tabs=0, newline_before=0, newline_after=0):
+def log_info(message, indentation_tabs=0, newline_before=0, newline_after=0, color_mode=None):
     """
     Log an info message with consistent formatting.
-    
-    Args:
-        message (str): Info message
-        indentation_tabs (int): Indentation level
-        newline_before (int): Newlines before
-        newline_after (int): Newlines after
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    prefix = "INFO:" if use_color else "[INFO]"
+    color = Colors.INFO if use_color else None
     log(indentation_tabs, newline_before, newline_after, 
-        Colors.INFO, f"ℹ {message}")
+        color, f"{prefix} {message}", color_mode=use_color)
 
 
-def log_debug(message, indentation_tabs=0, newline_before=0, newline_after=0):
+def log_debug(message, indentation_tabs=2, newline_before=0, newline_after=0, color_mode=None):
     """
-    Log a debug message with consistent formatting.
-    
-    Args:
-        message (str): Debug message
-        indentation_tabs (int): Indentation level
-        newline_before (int): Newlines before
-        newline_after (int): Newlines after
+    Log a debug message with consistent formatting. Default indentation is 2 tabs.
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    prefix = "DEBUG:" if use_color else "[DEBUG]"
+    color = Colors.DEBUG + Colors.BOLD if use_color else None
     log(indentation_tabs, newline_before, newline_after, 
-        Colors.DEBUG + Colors.DIM, f"🔍 DEBUG: {message}")
+        color, f"{prefix} {message}", color_mode=use_color)
 
 
-def log_step(step_number, total_steps, description, indentation_tabs=0):
+def log_step(step_number, total_steps, description, indentation_tabs=0, color_mode=None):
     """
     Log a step in a process with consistent formatting.
-    
-    Args:
-        step_number (int): Current step number
-        total_steps (int): Total number of steps
-        description (str): Step description
-        indentation_tabs (int): Indentation level
     """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    color = Colors.BRIGHT_BLUE + Colors.BOLD if use_color else None
     log_newline()
-    log(indentation_tabs, 1, 0, Colors.BRIGHT_BLUE + Colors.BOLD, 
-        f"[Step {step_number}/{total_steps}] {description}")
+    log(indentation_tabs, 1, 0, color, 
+        f"[Step {step_number}/{total_steps}] {description}", color_mode=use_color)
     log_newline()
 
 
-def log_file_saved(filepath, indentation_tabs=1):
+def log_file_saved(filepath, indentation_tabs=1, color_mode=None):
     """
     Log a file save operation with consistent formatting.
-    
-    Args:
-        filepath (str): Path to saved file
-        indentation_tabs (int): Indentation level
     """
-    log(indentation_tabs, 0, 0, Colors.SUCCESS, 
-        f"💾 Saved: {filepath}")
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    prefix = "Saved:"
+    color = Colors.SUCCESS if use_color else None
+    log(indentation_tabs, 0, 0, color, 
+        f"{prefix} {filepath}", color_mode=use_color)
 
 
-def log_final_result(success, message, width=60):
+def log_final_result(success, message, width=60, color_mode=None):
     """
     Log a final result with decorative formatting.
-    
-    Args:
-        success (bool): Whether the operation was successful
-        message (str): Result message to display
-        width (int): Width of the result box (default: 60)
-    
-    Usage:
-        log_final_result(True, "DETECTED TIME: 03:30")
-        log_final_result(False, "Failed to detect time from the clock image")
     """
-    color = Colors.SUCCESS + Colors.BOLD if success else Colors.ERROR + Colors.BOLD
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    color = (Colors.SUCCESS + Colors.BOLD if success else Colors.ERROR + Colors.BOLD) if use_color else None
     separator = "=" * width
     
     log_newline(2)
-    log(0, 1, 0, color, separator)
+    log(0, 1, 0, color, separator, color_mode=use_color)
     if success:
-        log_success(message, newline_after=1)
+        log_success(message, newline_after=1, color_mode=use_color)
     else:
-        log_error(message, newline_after=1)
-    log(0, 0, 1, color, separator)
+        log_error(message, newline_after=1, color_mode=use_color)
+    log(0, 0, 1, color, separator, color_mode=use_color)
     log_newline(2)
+
+
+# --- Tree Structured Logger ---
+
+def log_banner(title: str, width: int = 54, color_mode: Optional[bool] = None) -> None:
+    """
+    Log a top-level section header wrapped in ASCII border box.
+    Vibrant colors in Color Mode; plain text in Colorless Mode.
+    """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    min_width = len(title) + 6
+    if width < min_width:
+        width = min_width
+
+    line_dashes = '-' * (width - 2)
+    padded = f"| [{title.upper()}]".ljust(width - 1)
+
+    if use_color:
+        c = Colors.HEADER + Colors.BOLD
+        r = Colors.RESET
+        top = f"{c}+{line_dashes}+{r}"
+        mid = f"{c}{padded}|{r}"
+        bot = f"{c}+{line_dashes}+{r}"
+        print(f"\n{top}\n{mid}\n{bot}\n")
+    else:
+        top = f"+{line_dashes}+"
+        mid = f"{padded}|"
+        bot = f"+{line_dashes}+"
+        print(f"\n{top}\n{mid}\n{bot}\n")
+
+
+def log_section(category: str, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+    """
+    Log an indented sub-section or category header.
+    Vibrant colors in Color Mode; plain text in Colorless Mode.
+    """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    indent = '  ' * indent_level
+    cat_str = category if category.endswith(':') else f"{category}:"
+
+    if use_color:
+        c_tree = Colors.BRIGHT_CYAN
+        c_cat = Colors.BRIGHT_CYAN + Colors.BOLD
+        r = Colors.RESET
+        print(f"\n{indent}  {c_tree}|--{r} {c_cat}{cat_str}{r}")
+    else:
+        print(f"\n{indent}  |-- {cat_str}")
+
+
+def log_detail(label: str, value: Any, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+    """
+    Log a key-value metric item in the tree.
+    Vibrant colors in Color Mode; plain text in Colorless Mode.
+    """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    indent = '  ' * (indent_level + 1)
+    formatted_label = str(label).ljust(22)
+
+    if use_color:
+        c_tree = Colors.BRIGHT_CYAN
+        c_label = Colors.CYAN + Colors.BOLD
+        c_val = Colors.BRIGHT_WHITE + Colors.BOLD
+        r = Colors.RESET
+        print(f"{indent}{c_tree}+--{r} {c_label}{formatted_label}{r} : {c_val}{value}{r}")
+    else:
+        print(f"{indent}+-- {formatted_label} : {value}")
+
+
+def log_decision(action: str, detail: Optional[str] = None, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+    """
+    Log a decision or state transition arrow.
+    Vibrant colors in Color Mode; plain text in Colorless Mode.
+    """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    indent = '  ' * indent_level
+
+    if use_color:
+        c_arrow = Colors.BRIGHT_YELLOW + Colors.BOLD
+        c_action = Colors.BRIGHT_GREEN + Colors.BOLD
+        c_detail = Colors.BRIGHT_WHITE
+        r = Colors.RESET
+
+        if detail is not None and str(detail).strip() != "":
+            print(f"\n{indent}  {c_arrow}+--> DECISION:{r} {c_action}{action}{r} -> {c_detail}{detail}{r}\n")
+        else:
+            print(f"\n{indent}  {c_arrow}+--> DECISION:{r} {c_action}{action}{r}\n")
+    else:
+        if detail is not None and str(detail).strip() != "":
+            print(f"\n{indent}  +--> DECISION: {action} -> {detail}\n")
+        else:
+            print(f"\n{indent}  +--> DECISION: {action}\n")
+
+
+def log_message(message: str, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+    """
+    Log a raw message with optional tree indent prefix.
+    Vibrant colors in Color Mode; plain text in Colorless Mode.
+    """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+    indent = '  ' * indent_level
+
+    if use_color:
+        c_tree = Colors.BRIGHT_CYAN
+        c_msg = Colors.BRIGHT_WHITE
+        r = Colors.RESET
+        print(f"{indent}{c_tree}|--{r} {c_msg}{message}{r}")
+    else:
+        print(f"{indent}|-- {message}")
+
+
+class StructuredLogger:
+    """
+    Structured tree logger for Python applications.
+    Strictly uses framing, tree indentation, and decision arrows.
+    Fully colorized in Color Mode; plain text in Colorless Mode.
+    """
+
+    @staticmethod
+    def log_banner(title: str, width: int = 54, color_mode: Optional[bool] = None) -> None:
+        log_banner(title, width=width, color_mode=color_mode)
+
+    @staticmethod
+    def log_section(category: str, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+        log_section(category, indent_level=indent_level, color_mode=color_mode)
+
+    @staticmethod
+    def log_detail(label: str, value: Any, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+        log_detail(label, value, indent_level=indent_level, color_mode=color_mode)
+
+    @staticmethod
+    def log_decision(action: str, detail: Optional[str] = None, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+        log_decision(action, detail=detail, indent_level=indent_level, color_mode=color_mode)
+
+    @staticmethod
+    def log_message(message: str, indent_level: int = 0, color_mode: Optional[bool] = None) -> None:
+        log_message(message, indent_level=indent_level, color_mode=color_mode)
+
+    # CamelCase aliases
+    logBanner = log_banner
+    logSection = log_section
+    logDetail = log_detail
+    logDecision = log_decision
+    logMessage = log_message
+
+
+# Backward compatibility aliases
+AsciiLogger = StructuredLogger
+KeeperLogger = StructuredLogger

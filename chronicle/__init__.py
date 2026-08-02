@@ -17,9 +17,22 @@ from .logger import (
     log_step,
     log_file_saved,
     log_final_result,
+    set_color_mode,
+    get_color_mode,
+    set_colorless_mode,
+    set_ascii_mode,
+    get_ascii_mode,
+    StructuredLogger,
+    AsciiLogger,
+    KeeperLogger,
+    log_banner,
+    log_section,
+    log_detail,
+    log_decision,
+    log_message,
 )
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 __all__ = [
     "Colors",
@@ -36,4 +49,17 @@ __all__ = [
     "log_step",
     "log_file_saved",
     "log_final_result",
+    "set_color_mode",
+    "get_color_mode",
+    "set_colorless_mode",
+    "set_ascii_mode",
+    "get_ascii_mode",
+    "StructuredLogger",
+    "AsciiLogger",
+    "KeeperLogger",
+    "log_banner",
+    "log_section",
+    "log_detail",
+    "log_decision",
+    "log_message",
 ]
