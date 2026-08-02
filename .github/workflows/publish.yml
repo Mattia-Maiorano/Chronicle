@@ -6,9 +6,27 @@ on:
 
 permissions:
   contents: read
-  id-token: write  # Grants OIDC permissions for Trusted Publishing
+  id-token: write  # Grants OIDC permissions for npm & PyPI Trusted Publishing
 
 jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      - run: |
+          cd node
+          npm ci
+          npm run build
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        working-directory: ./node
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Or use OIDC if configured on npmjs.com
+
   publish-pypi:
     runs-on: ubuntu-latest
     steps:
@@ -36,4 +54,4 @@ jobs:
           cd csharp
           dotnet pack -c Release -o ./nupkg
       - name: Publish to NuGet
-        run: dotnet nuget push ./csharp/nupkg/*.nupkg -s https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push ./csharp/nupkg/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
