@@ -18,12 +18,12 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
       - run: |
-          cd node
+          cd typescript
           npm ci
           npm run build
       - name: Publish to npm
         run: npm publish --provenance --access public
-        working-directory: ./node
+        working-directory: ./typescript
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Or use OIDC if configured on npmjs.com
 
