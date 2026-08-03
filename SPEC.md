@@ -1,6 +1,6 @@
 # Chronicle Specification (SPEC.md)
 
-**Version**: 1.0.2  
+**Version**: 1.0.4  
 **Specification**: Universal Formatting & API Specification for Chronicle Logging Engine
 
 ---

@@ -1,6 +1,6 @@
 name: chronicle
 description: A flexible structured, colorized, and colorless console logging package for Dart and Flutter.
-version: 1.0.2
+version: 1.0.4
 homepage: https://github.com/Mattia-Maiorano/Chronicle
 repository: https://github.com/Mattia-Maiorano/Chronicle/tree/main/dart
 

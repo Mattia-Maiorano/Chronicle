@@ -1,6 +1,6 @@
 {
   "name": "com.mattiamaiorano.chronicle",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "displayName": "Chronicle Logging",
   "description": "Flexible structured, colorized, and colorless console logging system for .NET and Unity applications.",
   "unity": "2021.3",

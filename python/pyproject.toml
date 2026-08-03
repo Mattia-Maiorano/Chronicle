@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chronicle-py"
-version = "0.1.2"
+version = "1.0.4"
 description = "A flexible and colorized logging system for Python applications"
 readme = "README.md"
 authors = [
