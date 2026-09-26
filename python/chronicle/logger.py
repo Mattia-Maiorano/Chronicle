@@ -3,7 +3,7 @@ Logger module for structured, colorized, and colorless console output.
 Provides a flexible logging function with indentation, spacing, color, and tree structure support.
 """
 
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 _COLOR_MODE: bool = True
 
@@ -397,6 +397,88 @@ def log_message(message: str, indent_level: int = 0, color_mode: Optional[bool] 
         print(f"{indent}{c_tree}|--{r} {c_msg}{message}{r}")
     else:
         print(f"{indent}|-- {message}")
+
+def log_table(rows: List[List[str]], headers: Optional[List[str]] = None, alignments: Optional[List[str]] = None, color_mode: Optional[bool] = None) -> None:
+    """Render a table of rows with optional headers and alignments.
+
+    Args:
+        rows: List of rows, each a list of cell strings.
+        headers: Optional list of column headers.
+        alignments: Optional list of alignment specifiers per column ('<', '^', '>').
+        color_mode: Override global color mode.
+    """
+    use_color = _COLOR_MODE if color_mode is None else color_mode
+
+    # Determine column count
+    col_count = max(
+        len(headers) if headers else 0,
+        max((len(r) for r in rows), default=0)
+    )
+    if col_count == 0:
+        return
+
+    # Compute column widths
+    col_widths = [0] * col_count
+    for r in rows:
+        for i, cell in enumerate(r):
+            col_widths[i] = max(col_widths[i], len(str(cell)))
+    if headers:
+        for i, h in enumerate(headers):
+            col_widths[i] = max(col_widths[i], len(str(h)))
+
+    # Prepare alignments (default left)
+    if not alignments:
+        alignments = ['<'] * col_count
+    else:
+        alignments = (list(alignments) + ['<'] * col_count)[:col_count]
+
+    # Border characters based on mode
+    if use_color:
+        tl, tm, tr = '┌', '┬', '┐'
+        ml, mm, mr = '├', '┼', '┤'
+        bl, bm, br = '└', '┴', '┘'
+        h, v = '─', '│'
+        border_color = Colors.BRIGHT_CYAN
+    else:
+        tl = tm = tr = ml = mm = mr = bl = bm = br = '+'
+        h = '-'
+        v = '|'
+        border_color = None
+
+    def make_line(left, sep, right):
+        line = left
+        for i, w in enumerate(col_widths):
+            line += h * (w + 2)
+            line += sep if i < len(col_widths) - 1 else right
+        return line
+
+    top_line = make_line(tl, tm, tr)
+    sep_line = make_line(ml, mm, mr)
+    bottom_line = make_line(bl, bm, br)
+
+    def format_row(cells):
+        parts = []
+        for i, cell in enumerate(cells):
+            txt = str(cell)
+            align = alignments[i]
+            parts.append(f' {txt:{align}{col_widths[i]}} ')
+        return v + v.join(parts) + v
+
+    lines = [top_line]
+    if headers:
+        lines.append(format_row(headers))
+        lines.append(sep_line)
+    for r in rows:
+        padded = r + [''] * (col_count - len(r))
+        lines.append(format_row(padded))
+    lines.append(bottom_line)
+
+    for line in lines:
+        if border_color and use_color:
+            print(f"{border_color}{line}{Colors.RESET}")
+        else:
+            print(line)
+
 
 
 class StructuredLogger:

@@ -392,6 +392,69 @@ export function logMessage(message: string, indentLevel: number = 0, colorMode: 
   }
 }
 
+export function logTable(rows: string[][], headers?: string[], alignments?: string[], colorMode: boolean | null = null): void {
+  const useColor = colorMode === null || colorMode === undefined ? _colorMode : colorMode;
+
+  const colCount = Math.max(headers ? headers.length : 0, ...rows.map(r => r.length));
+  if (colCount === 0) return;
+
+  const colWidths = new Array(colCount).fill(0);
+  rows.forEach(r => {
+    r.forEach((cell, i) => {
+      colWidths[i] = Math.max(colWidths[i], cell.length);
+    });
+  });
+  if (headers) {
+    headers.forEach((h, i) => {
+      colWidths[i] = Math.max(colWidths[i], h.length);
+    });
+  }
+
+  const aligns = alignments ? alignments.slice(0, colCount) : Array(colCount).fill('<');
+
+  const chars = useColor
+    ? { tl: '┌', tm: '┬', tr: '┐', ml: '├', mm: '┼', mr: '┤', bl: '└', bm: '┴', br: '┘', h: '─', v: '│', color: Colors.BRIGHT_CYAN }
+    : { tl: '+', tm: '+', tr: '+', ml: '+', mm: '+', mr: '+', bl: '+', bm: '+', br: '+', h: '-', v: '|', color: null };
+
+  const makeLine = (left: string, sep: string, right: string): string => {
+    let line = left;
+    colWidths.forEach((w, i) => {
+      line += chars.h.repeat(w + 2);
+      line += i < colWidths.length - 1 ? sep : right;
+    });
+    return line;
+  };
+
+  const top = makeLine(chars.tl, chars.tm, chars.tr);
+  const middle = makeLine(chars.ml, chars.mm, chars.mr);
+  const bottom = makeLine(chars.bl, chars.bm, chars.br);
+
+  const formatRow = (cells: string[]): string => {
+    const parts = cells.map((c, i) => ` ${c.padEnd(colWidths[i], ' ')} `);
+    return chars.v + parts.join(chars.v) + chars.v;
+  };
+
+  const lines: string[] = [top];
+  if (headers) {
+    lines.push(formatRow(headers));
+    lines.push(middle);
+  }
+  rows.forEach(r => {
+    const padded = r.concat(Array(colCount - r.length).fill(''));
+    lines.push(formatRow(padded));
+  });
+  lines.push(bottom);
+
+  lines.forEach(line => {
+    if (chars.color && useColor) {
+      process.stdout.write(`${chars.color}${line}${Colors.RESET}\n`);
+    } else {
+      process.stdout.write(`${line}\n`);
+    }
+  });
+}
+
+
 export class StructuredLogger {
   static logBanner = logBanner;
   static logSection = logSection;

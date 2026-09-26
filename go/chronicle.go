@@ -531,3 +531,117 @@ func LogMessage(message string, indentLevelOpt ...int) {
 		fmt.Printf("%s|-- %s\n", indent, message)
 	}
 }
+
+// LogTable logs a formatted table with optional headers and alignments.
+func LogTable(rows [][]string, headers []string, alignments []string, colorMode ...bool) {
+    useColor := GetColorMode()
+    if len(colorMode) > 0 {
+        useColor = colorMode[0]
+    }
+    // Determine column count
+    colCount := 0
+    if len(headers) > 0 {
+        colCount = len(headers)
+    } else if len(rows) > 0 {
+        colCount = len(rows[0])
+    }
+    if colCount == 0 {
+        return
+    }
+    // Compute max width per column
+    colWidths := make([]int, colCount)
+    for i, h := range headers {
+        if len(h) > colWidths[i] {
+            colWidths[i] = len(h)
+        }
+    }
+    for _, row := range rows {
+        for i, cell := range row {
+            if len(cell) > colWidths[i] {
+                colWidths[i] = len(cell)
+            }
+        }
+    }
+    // Default alignments to left
+    if len(alignments) < colCount {
+        newAlign := make([]string, colCount)
+        copy(newAlign, alignments)
+        for i := len(alignments); i < colCount; i++ {
+            newAlign[i] = "left"
+        }
+        alignments = newAlign
+    }
+    // Border characters based on color mode
+    var tl, tr, bl, br, horiz, vert, mid string
+    if useColor {
+        tl, tr, bl, br, horiz, vert, mid = "┌", "┐", "└", "┘", "─", "│", "├"
+    } else {
+        tl, tr, bl, br, horiz, vert, mid = "+", "+", "+", "+", "-", "|", "+"
+    }
+    // Helper to pad cells
+    pad := func(content string, width int, align string) string {
+        switch align {
+        case "right":
+            return fmt.Sprintf("%*s", width, content)
+        case "center":
+            left := (width - len(content)) / 2
+            right := width - len(content) - left
+            return fmt.Sprintf("%s%s%s", strings.Repeat(" ", left), content, strings.Repeat(" ", right))
+        default: // left
+            return fmt.Sprintf("%-*s", width, content)
+        }
+    }
+    // Build top border
+    var sb strings.Builder
+    sb.WriteString(tl)
+    for i, w := range colWidths {
+        sb.WriteString(strings.Repeat(horiz, w+2))
+        if i < colCount-1 {
+            sb.WriteString(horiz)
+        }
+    }
+    sb.WriteString(tr)
+    Log(0, 1, 0, "", sb.String())
+    // Header row
+    if len(headers) > 0 {
+        sb.Reset()
+        sb.WriteString(vert)
+        for i, h := range headers {
+            padded := pad(h, colWidths[i], alignments[i])
+            sb.WriteString(" " + padded + " " + vert)
+        }
+        Log(0, 0, 0, "", sb.String())
+        // Separator after header
+        sb.Reset()
+        sb.WriteString(mid)
+        for i, w := range colWidths {
+            sb.WriteString(strings.Repeat(horiz, w+2))
+            if i < colCount-1 {
+                sb.WriteString(horiz)
+            }
+        }
+        sb.WriteString(mid)
+        Log(0, 0, 0, "", sb.String())
+    }
+    // Data rows
+    for _, row := range rows {
+        sb.Reset()
+        sb.WriteString(vert)
+        for i, cell := range row {
+            padded := pad(cell, colWidths[i], alignments[i])
+            sb.WriteString(" " + padded + " " + vert)
+        }
+        Log(0, 0, 0, "", sb.String())
+    }
+    // Bottom border
+    sb.Reset()
+    sb.WriteString(bl)
+    for i, w := range colWidths {
+        sb.WriteString(strings.Repeat(horiz, w+2))
+        if i < colCount-1 {
+            sb.WriteString(horiz)
+        }
+    }
+    sb.WriteString(br)
+    Log(0, 0, 1, "", sb.String())
+}

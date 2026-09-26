@@ -100,6 +100,13 @@ void main() {
   StructuredLogger.logSection("Execution Phase");
   StructuredLogger.logDetail("Batch size", 64);
   StructuredLogger.logDecision("PASS", detail: "Quality score 0.96 >= 0.85 threshold");
+
+  // Example table logging
+  StructuredLogger.logTable([
+    ["Epoch", "Losses", "Errors", "Stats"],
+    ["024/040", "Train Total: 3.49643 (Pred: 3.19063, Probe: 0.30581)", "Pos Err: 0.69107 | Vel Err: 0.73560", "Spike Rate: Train 0.110 / Val 0.111 | Grad Norm: 0.6237"],
+  ]);
+
 }
 ```
 

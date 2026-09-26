@@ -453,9 +453,116 @@ void _logMessage(String message, {int indentLevel = 0, bool? colorMode}) {
   }
 }
 
+/// Logs a formatted table.
+/// Supports optional headers and column alignments.
+/// `alignments` uses '<' for left, '>' for right alignment.
+void logTable(List<List<String>> rows, {List<String>? headers, List<String>? alignments, bool? colorMode}) {
+  final useColor = colorMode ?? _colorMode;
+
+  final colCount = Math.max(headers?.length ?? 0, rows.fold<int>(0, (prev, r) => r.length > prev ? r.length : prev));
+  if (colCount == 0) return;
+
+  // Compute column widths
+  final colWidths = List<int>.filled(colCount, 0);
+  for (var r in rows) {
+    for (var i = 0; i < r.length; i++) {
+      colWidths[i] = colWidths[i] > r[i].length ? colWidths[i] : r[i].length;
+    }
+  }
+  if (headers != null) {
+    for (var i = 0; i < headers.length; i++) {
+      colWidths[i] = colWidths[i] > headers[i].length ? colWidths[i] : headers[i].length;
+    }
+  }
+
+  final aligns = alignments?.take(colCount).toList() ?? List<String>.filled(colCount, '<');
+
+  final chars = useColor
+      ? {
+          'tl': '┌',
+          'tm': '┬',
+          'tr': '┐',
+          'ml': '├',
+          'mm': '┼',
+          'mr': '┤',
+          'bl': '└',
+          'bm': '┴',
+          'br': '┘',
+          'h': '─',
+          'v': '│',
+          'color': Colors.brightCyan
+        }
+      : {
+          'tl': '+',
+          'tm': '+',
+          'tr': '+',
+          'ml': '+',
+          'mm': '+',
+          'mr': '+',
+          'bl': '+',
+          'bm': '+',
+          'br': '+',
+          'h': '-',
+          'v': '|',
+          'color': null
+        };
+
+  String makeLine(String left, String sep, String right) {
+    var line = left;
+    for (var i = 0; i < colWidths.length; i++) {
+      line += chars['h']! * (colWidths[i] + 2);
+      line += i < colWidths.length - 1 ? sep : right;
+    }
+    return line;
+  }
+
+  final top = makeLine(chars['tl']!, chars['tm']!, chars['tr']!);
+  final middle = makeLine(chars['ml']!, chars['mm']!, chars['mr']!);
+  final bottom = makeLine(chars['bl']!, chars['bm']!, chars['br']!);
+
+  String formatRow(List<String> cells) {
+    final parts = List<String>.generate(colCount, (i) {
+      final cell = i < cells.length ? cells[i] : '';
+      final width = colWidths[i];
+      final align = aligns[i];
+      if (align == '>') {
+        return ' ${cell.padLeft(width)} ';
+      } else {
+        return ' ${cell.padRight(width)} ';
+      }
+    });
+    return chars['v']! + parts.join(chars['v']!) + chars['v']!;
+  }
+
+  final lines = <String>[];
+  lines.add(top);
+  if (headers != null) {
+    lines.add(formatRow(headers));
+    lines.add(middle);
+  }
+  for (var r in rows) {
+    final padded = List<String>.from(r);
+    if (padded.length < colCount) padded.addAll(List.filled(colCount - padded.length, ''));
+    lines.add(formatRow(padded));
+  }
+  lines.add(bottom);
+
+  for (var line in lines) {
+    if (chars['color'] != null && useColor) {
+      _write('\${chars['color']}$line${Colors.reset}\n');
+    } else {
+      _write('$line\n');
+    }
+  }
+}
+
+
 class StructuredLogger {
   static void logBanner(String title, {int width = 54, bool? colorMode}) =>
       _logBanner(title, width: width, colorMode: colorMode);
+
+  static void logTable(List<List<String>> rows, {List<String>? headers, List<String>? alignments, bool? colorMode}) =>
+      logTable(rows, headers: headers, alignments: alignments, colorMode: colorMode);
 
   static void logSection(String category, {int indentLevel = 0, bool? colorMode}) =>
       _logSection(category, indentLevel: indentLevel, colorMode: colorMode);

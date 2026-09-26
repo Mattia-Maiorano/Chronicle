@@ -393,6 +393,89 @@ namespace Chronicle
                 Console.Write($"{indent}|-- {message}\n");
             }
         }
+        
+        // Table logging
+        public static void LogTable(List<List<string>> rows, List<string>? headers = null, List<string>? alignments = null, bool? colorMode = null)
+        {
+            bool useColor = colorMode ?? GetColorMode();
+            int colCount = Math.Max(headers?.Count ?? 0, rows.Any() ? rows.Max(r => r.Count) : 0);
+            if (colCount == 0) return;
+
+            var colWidths = new int[colCount];
+            foreach (var r in rows)
+            {
+                for (int i = 0; i < r.Count; i++)
+                {
+                    colWidths[i] = Math.Max(colWidths[i], r[i].Length);
+                }
+            }
+            if (headers != null)
+            {
+                for (int i = 0; i < headers.Count; i++)
+                {
+                    colWidths[i] = Math.Max(colWidths[i], headers[i].Length);
+                }
+            }
+
+            var aligns = alignments?.Take(colCount).ToArray() ?? Enumerable.Repeat("<", colCount).ToArray();
+
+            var chars = useColor
+                ? new Dictionary<string, string> { { "tl", "┌" }, { "tm", "┬" }, { "tr", "┐" }, { "ml", "├" }, { "mm", "┼" }, { "mr", "┤" }, { "bl", "└" }, { "bm", "┴" }, { "br", "┘" }, { "h", "─" }, { "v", "│" }, { "color", Colors.BRIGHT_CYAN } }
+                : new Dictionary<string, string> { { "tl", "+" }, { "tm", "+" }, { "tr", "+" }, { "ml", "+" }, { "mm", "+" }, { "mr", "+" }, { "bl", "+" }, { "bm", "+" }, { "br", "+" }, { "h", "-" }, { "v", "|" }, { "color", null } };
+
+            string MakeLine(string left, string sep, string right)
+            {
+                var line = left;
+                for (int i = 0; i < colWidths.Length; i++)
+                {
+                    line += new string(chars["h"][0], colWidths[i] + 2);
+                    line += i < colWidths.Length - 1 ? sep : right;
+                }
+                return line;
+            }
+
+            var top = MakeLine(chars["tl"], chars["tm"], chars["tr"]);
+            var middle = MakeLine(chars["ml"], chars["mm"], chars["mr"]);
+            var bottom = MakeLine(chars["bl"], chars["bm"], chars["br"]);
+
+            string FormatRow(List<string> cells)
+            {
+                var parts = new List<string>();
+                for (int i = 0; i < colCount; i++)
+                {
+                    var cell = i < cells.Count ? cells[i] : "";
+                    var width = colWidths[i];
+                    var align = aligns[i];
+                    if (align == ">")
+                        parts.Add($" {cell.PadLeft(width)} ");
+                    else
+                        parts.Add($" {cell.PadRight(width)} ");
+                }
+                return chars["v"] + string.Join(chars["v"], parts) + chars["v"];
+            }
+
+            var lines = new List<string> { top };
+            if (headers != null)
+            {
+                lines.Add(FormatRow(headers));
+                lines.Add(middle);
+            }
+            foreach (var r in rows)
+            {
+                var padded = new List<string>(r);
+                if (padded.Count < colCount) padded.AddRange(Enumerable.Repeat("", colCount - padded.Count));
+                lines.Add(FormatRow(padded));
+            }
+            lines.Add(bottom);
+
+            foreach (var line in lines)
+            {
+                if (chars["color"] != null && useColor)
+                    WriteOutput($"{chars["color"]}{line}{Colors.RESET}\n");
+                else
+                    WriteOutput($"{line}\n");
+            }
+        }
 
         // Snake_case aliases
         public static void log_banner(string title, int width = 54, bool? colorMode = null) => LogBanner(title, width, colorMode);
@@ -400,5 +483,6 @@ namespace Chronicle
         public static void log_detail(object label, object? value, int indentLevel = 0, bool? colorMode = null) => LogDetail(label, value, indentLevel, colorMode);
         public static void log_decision(string action, string? detail = null, int indentLevel = 0, bool? colorMode = null) => LogDecision(action, detail, indentLevel, colorMode);
         public static void log_message(string message, int indentLevel = 0, bool? colorMode = null) => LogMessage(message, indentLevel, colorMode);
+        public static void log_table(List<List<string>> rows, List<string>? headers = null, List<string>? alignments = null, bool? colorMode = null) => LogTable(rows, headers, alignments, colorMode);
     }
 }
