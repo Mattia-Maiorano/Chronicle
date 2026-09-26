@@ -397,7 +397,7 @@ namespace Chronicle
         // Table logging
         public static void LogTable(List<List<string>> rows, List<string>? headers = null, List<string>? alignments = null, bool? colorMode = null)
         {
-            bool useColor = colorMode ?? GetColorMode();
+            bool useColor = colorMode ?? ChronicleLogger.GetColorMode();
             int colCount = Math.Max(headers?.Count ?? 0, rows.Any() ? rows.Max(r => r.Count) : 0);
             if (colCount == 0) return;
 
@@ -420,7 +420,7 @@ namespace Chronicle
             var aligns = alignments?.Take(colCount).ToArray() ?? Enumerable.Repeat("<", colCount).ToArray();
 
             var chars = useColor
-                ? new Dictionary<string, string> { { "tl", "┌" }, { "tm", "┬" }, { "tr", "┐" }, { "ml", "├" }, { "mm", "┼" }, { "mr", "┤" }, { "bl", "└" }, { "bm", "┴" }, { "br", "┘" }, { "h", "─" }, { "v", "│" }, { "color", Colors.BRIGHT_CYAN } }
+                ? new Dictionary<string, string> { { "tl", "┌" }, { "tm", "┬" }, { "tr", "┐" }, { "ml", "├" }, { "mm", "┼" }, { "mr", "┤" }, { "bl", "└" }, { "bm", "┴" }, { "br", "┘" }, { "h", "─" }, { "v", "│" }, { "color", ChronicleLogger.Colors.BRIGHT_CYAN } }
                 : new Dictionary<string, string> { { "tl", "+" }, { "tm", "+" }, { "tr", "+" }, { "ml", "+" }, { "mm", "+" }, { "mr", "+" }, { "bl", "+" }, { "bm", "+" }, { "br", "+" }, { "h", "-" }, { "v", "|" }, { "color", null } };
 
             string MakeLine(string left, string sep, string right)
@@ -471,9 +471,9 @@ namespace Chronicle
             foreach (var line in lines)
             {
                 if (chars["color"] != null && useColor)
-                    WriteOutput($"{chars["color"]}{line}{Colors.RESET}\n");
+                    Console.Write($"{chars["color"]}{line}{ChronicleLogger.Colors.RESET}\n");
                 else
-                    WriteOutput($"{line}\n");
+                    Console.Write($"{line}\n");
             }
         }
 
