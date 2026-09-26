@@ -1,4 +1,5 @@
 import 'io_stub.dart' if (dart.library.io) 'dart:io';
+import 'dart:math';
 
 bool _colorMode = true;
 
@@ -459,7 +460,7 @@ void _logMessage(String message, {int indentLevel = 0, bool? colorMode}) {
 void logTable(List<List<String>> rows, {List<String>? headers, List<String>? alignments, bool? colorMode}) {
   final useColor = colorMode ?? _colorMode;
 
-  final colCount = Math.max(headers?.length ?? 0, rows.fold<int>(0, (prev, r) => r.length > prev ? r.length : prev));
+  final colCount = max(headers?.length ?? 0, rows.fold<int>(0, (prev, r) => r.length > prev ? r.length : prev));
   if (colCount == 0) return;
 
   // Compute column widths
@@ -549,7 +550,7 @@ void logTable(List<List<String>> rows, {List<String>? headers, List<String>? ali
 
   for (var line in lines) {
     if (chars['color'] != null && useColor) {
-      _write('\${chars['color']}$line${Colors.reset}\n');
+      _write("${chars['color']}$line${Colors.reset}\n");
     } else {
       _write('$line\n');
     }
