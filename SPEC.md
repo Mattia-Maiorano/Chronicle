@@ -144,3 +144,32 @@ Each language implementation provides zero-dependency native functions and a `St
 - `log_detail(label, value, indent_level)`
 - `log_decision(action, detail, indent_level)`
 - `log_message(message, indent_level)`
+
+---
+
+## 6. Live Dashboard & Layout Framework
+
+Chronicle features a zero-dependency, rich-like terminal rendering framework designed to build live, responsive dashboards that update in place. This framework is implemented across supported languages according to the following architectural guidelines:
+
+### A. Core Concepts
+* **Virtual Canvas**: A 2D text buffer allowing `O(1)` coordinate blitting, which cleanly clips components that exceed bounds.
+* **Renderable Protocol**: All UI components implement a shared interface to measure their required dimensions (`measure(ctx)`) and to draw themselves (`render(bounds, ctx)`).
+* **Line-Diffing / Snapshots**:
+  * **Color Mode**: The engine uses cursor-jumping (`\033[{N}A`) and line clearing (`\033[2K`) to update components in-place, or the alternate screen buffer (`\033[?1049h`) for full-screen dashboards. Cursor is hidden (`\033[?25l`).
+  * **Colorless Mode**: Suppresses cursor navigation. Degrades gracefully to periodically printing plain-text static snapshots of the layout.
+
+### B. Layout Primitives
+* `Layout` / `FlexSplitter`: Supports nesting, splitting horizontally or vertically. Adheres to sizing policies: `Fixed(cells)`, `Flex(weight)`, and `Ratio(percentage)`.
+* `Panel`: Wraps content in styled borders matching Chronicle's standard (`DOUBLE`, `ROUNDED`, `SQUARE`, `CHRONICLE_TREE`). Supports title and subtitle injection.
+* `Rule`: Horizontal line spanning the container, supporting injected titles.
+* `Text`: Text block with support for alignment (`LEFT`, `CENTER`, `RIGHT`) and truncation (`...`).
+
+### C. UI Components
+* `LiveTable`: Dynamic grid supporting flex columns, auto-resizing, and cell updates. Can render both text and nested UI components (like `Badge` and `ProgressBar`).
+* `RollingLogStream`: A bounded ring-buffer that displays sequential log lines. Chronicle standard logging can be captured and piped directly into this stream.
+* `ProgressBar`: Indeterminate/determinate progress indicator with a percentage label and animated spinner.
+* `Badge`: Visual status tag with semantic coloring matching standard log styles (e.g., `RUNNING`, `PASS`, `ERROR`).
+
+### D. Concurrency & Safety
+* **Event Loop**: Powered by a background daemon thread (or equivalent async timer/ticker, e.g., `setInterval` in Node, Goroutine in Go). Refreshes based on a debounced `dirty` flag.
+* **Fail-Safe Exit**: Implementations MUST catch uncaught exceptions, interrupt signals (`SIGINT`, `SIGTERM`), and teardown cleanly, ensuring the cursor is shown (`\033[?25h`) and standard logging behavior is restored.
