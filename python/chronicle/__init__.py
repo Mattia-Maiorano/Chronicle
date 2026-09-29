@@ -32,6 +32,11 @@ from .logger import (
     log_message,
 )
 
+from .core.geometry import Size, Point, Segment, VisualMeter, TerminalMetrics
+from .layout import RenderContext, Renderable, Text, Rule, Panel, Layout, FlexSplitter, Fixed, Flex, Ratio
+from .components import LiveTable, Column, RollingLogStream, Badge, ProgressBar
+from .engine import Canvas, LiveEngine
+
 __version__ = "1.0.4"
 
 __all__ = [
@@ -62,4 +67,8 @@ __all__ = [
     "log_detail",
     "log_decision",
     "log_message",
+    "Size", "Point", "Segment", "VisualMeter", "TerminalMetrics",
+    "RenderContext", "Renderable", "Text", "Rule", "Panel", "Layout", "FlexSplitter", "Fixed", "Flex", "Ratio",
+    "LiveTable", "Column", "RollingLogStream", "Badge", "ProgressBar",
+    "Canvas", "LiveEngine"
 ]
