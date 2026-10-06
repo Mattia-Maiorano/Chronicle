@@ -1,6 +1,8 @@
 import 'io_stub.dart' if (dart.library.io) 'dart:io';
 import 'dart:math';
 
+export 'chronicle_live.dart';
+
 bool _colorMode = true;
 
 void setColorMode([bool enabled = true]) {

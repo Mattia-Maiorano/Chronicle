@@ -189,6 +189,41 @@ Chronicle produces identical terminal output across all 6 languages:
 
 ---
 
+## Live Dashboard & Layout Framework
+
+Chronicle includes a zero-dependency, rich-like terminal rendering framework designed to build live, responsive dashboards that update in place across Python, TypeScript, Go, Dart, Kotlin, and C#.
+
+```python
+from chronicle import (
+    LiveEngine, Layout, Panel, LiveTable, Column,
+    RollingLogStream, Badge, ProgressBar, Text, Fixed, Flex,
+    Colors
+)
+
+# 1. Setup Data Components
+stream = RollingLogStream(max_lines=50)
+table = LiveTable([
+    Column("Task", min_width=15, flex=2),
+    Column("Status", min_width=10, align="center"),
+    Column("Progress", flex=3)
+])
+
+p1 = ProgressBar(100, 0, "Build")
+table.add_row("task1", ["Frontend", Badge("RUNNING", "RUNNING"), p1])
+
+# 2. Compose Layout
+main_layout = Layout(Layout.VERTICAL)
+main_layout.add(Panel(Text("LIVE PIPELINE STATUS", style=Colors.BRIGHT_MAGENTA, align=Text.CENTER), border_style=Panel.ROUNDED), Fixed(3))
+main_layout.add(Panel(table, title="Active Tasks", border_style=Panel.DOUBLE), Flex(1))
+main_layout.add(Panel(stream, title="Timeline Event Stream", border_style=Panel.CHRONICLE_TREE), Flex(1))
+
+# 3. Run Live Engine
+with LiveEngine(main_layout, mode=LiveEngine.ALTERNATE_SCREEN, refresh_rate_hz=10, redirect_stdout=True, stream=stream):
+    p1.update(50)
+```
+
+---
+
 ## Specification
 
 For complete ANSI palette escape codes, border box glyphs, line padding conventions, and API method signatures, see the [SPEC.md](SPEC.md) document.
